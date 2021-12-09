@@ -1,2 +1,3 @@
 # GeoRise
-Main module is window.py
+window.py - Interface module
+mediator.py - main module, where task have been solved
