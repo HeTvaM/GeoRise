@@ -40,7 +40,7 @@ def scale(func):
 
         check_border()
 
-        res = cls.draw()
+        res = cls.redraw()
 
         return res
     return wrapper

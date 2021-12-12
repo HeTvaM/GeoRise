@@ -79,11 +79,6 @@ class Plot:
                     self.step = Oi/10
                     self.redraw()
                     return
-        def last_line():
-            "Отрисовка линии, соединяющая последную и первую точку, чтобы можно было визуально представлять фигуру"
-            self.lastline["X"] = [dot[0] for dot in [self.dots[0], self.dots[-1]]]
-            self.lastline["Y"] = [dot[1] for dot in [self.dots[0], self.dots[-1]]]
-            self.ax.plot(self.lastline["X"],self.lastline["Y"], color="b",label=f"Side №:{ls+1}")
         def new_line():
             self.data["X"].append([dot[0] for dot in self.dots[size-2:]])
             self.data["Y"].append([dot[1] for dot in self.dots[size-2:]])
@@ -100,7 +95,6 @@ class Plot:
         if size > 2:
             if self.lastline["X"] is not None:
                 self.redraw()
-            last_line()
 
         self.ax.legend(loc='upper left', frameon=False)
         return self.figure
@@ -116,7 +110,6 @@ class Plot:
     def laststep(self):
         "Откатывает сетку, к предыдущему вводу точки"
         def reinit():
-            ls = len(self.data["X"])
             try:
                 self.dots.pop()
                 self.data["X"].pop()
@@ -125,10 +118,6 @@ class Plot:
                 return self.figure
 
             self.redraw()
-
-            self.lastline["X"] = [dot[0] for dot in [self.dots[0], self.dots[-1]]]
-            self.lastline["Y"] = [dot[1] for dot in [self.dots[0], self.dots[-1]]]
-            self.ax.plot(self.lastline["X"],self.lastline["Y"], color="b",label=f"Side №:{ls+1}")
 
         reinit()
         return self.figure
@@ -150,12 +139,17 @@ class Plot:
         self.ax.clear()
         self.init_graph()
         self.show_graph(self.border)
+        ls = len(self.data["X"])
 
         for dot in self.dots:
             self.ax.scatter(dot[0],dot[1])
 
         for i in range(len(self.data["X"])):
             self.ax.plot(self.data["X"][i], self.data["Y"][i], color="b", label=f"Side №:{i+1}")
+
+        self.lastline["X"] = [dot[0] for dot in [self.dots[0], self.dots[-1]]]
+        self.lastline["Y"] = [dot[1] for dot in [self.dots[0], self.dots[-1]]]
+        self.ax.plot(self.lastline["X"],self.lastline["Y"], color="b",label=f"Side №:{ls+1}")
 
         return self.figure
 
