@@ -5,7 +5,8 @@ import os
 from tkinter.messagebox import showerror
 
 # import user's libs
-from logger import log_with_return, log, check
+from logger import log_with_return, log
+from decor import check
 
 #>------------SUMMARY----------------<
 # This module for decorator, save and load file. The file is uploaded in Json format in the transmitted file name

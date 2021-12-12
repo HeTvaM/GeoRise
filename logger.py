@@ -143,17 +143,3 @@ def log_print(func):
                 fileToWrite.write(get_text(3, str))
 
     return wrapper
-
-
-def check(error):
-    def log(func):
-        def wrapper(*args, **kwargs):
-            file = f"{args[0]}.txt"
-            if os.path.isfile(file):
-                return error()
-            else:
-                res = func(*args, **kwargs)
-
-            return res
-        return wrapper
-    return log

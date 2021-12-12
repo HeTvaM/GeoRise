@@ -1,5 +1,6 @@
 # import system libs
 import os
+import tkinter.font as tF
 from tkinter import *
 from tkinter.messagebox import *
 from tkinter.filedialog import *
@@ -47,6 +48,11 @@ class Win():
         self.win.resizable(width=False, height=False)
         self.win.focus_set()
 
+        # init font for widgets
+        self.fLabel = tF.Font(family="Times", size=15)
+        self.fEntry = tF.Font(family="Times", size=13)
+        self.fButton = tF.Font(family="Times", size=15)
+
         # Иницилизация переменных для работы класса
         self.ent = []
         self.btn = []
@@ -80,14 +86,14 @@ class Win():
             self.button_frame.place(x=0,y=700)
         def entry():
             text = ["X", "Y"]
-            x, y = 5, 35
+            x, y = 0, 5
             for i in range(2):
-                lb = Label(self.button_frame, text = f"Введите {text[i]} координату:", height=3, width = 25, bg="white")
-                i = Entry(self.button_frame, text = f"Введите {text[i]} координату:", width=10)
-                lb.place(x=x, y=y-15)
-                i.place(x=x+155, y=y)
+                lb = Label(self.button_frame, text = f"Введите {text[i]} координату:", height=3, width = 20, bg="white", font=self.fLabel)
+                i = Entry(self.button_frame, width=10, relief=RAISED, font=self.fEntry, bg="magenta")
+                lb.place(x=x, y=y)
+                i.place(x=x+220, y=y+25)
                 self.ent.append(i)
-                y += 50
+                y += 60
             self.ent[0].bind("<Down>", lambda event: self.ent[1].focus())
             self.ent[1].bind("<Return>", lambda event: self.add_dot())
         def toolbar():
@@ -103,13 +109,20 @@ class Win():
             color = ["green","cyan"]
             x = 405
             for i in range(2):
-                i = Button(self.button_frame, text = text[i], height = 5, width = 22, command = command[i], bg=color[i])
-                i.place(x=x, y=35)
+                i = Button(self.button_frame, text = text[i], height = 4, width = 15, command = command[i], bg=color[i], font=self.fButton)
+                i.place(x=x, y=25)
                 self.btn.append(i)
                 x += 200
         def bind():
             self.win.bind("<Escape>", lambda event: reset())
             self.win.bind("<Return>", lambda event: self.ent[0].focus())
+            self.win.bind("<MouseWheel>", scale)
+        def scale(event):
+            if event.delta > 0:
+                fig = self.plot.scale_out()
+            else:
+                fig = self.plot.scale_in()
+            self.show_plot(figure=fig)
         def reset():
             fig = self.plot.laststep()
             self.show_plot(figure=fig)
@@ -177,7 +190,7 @@ class Win():
                 self.dots.pop()
             check_res(res)
         def check_res(res):
-            if res is None:
+            if len(res) < 1:
                 showinfo("Выпуклый!","Данный многоугольник является выпуклым!\nПопробуйте добавить точку")
             else:
                 self.rigthdot = res[-1]
@@ -221,7 +234,6 @@ class Win():
         path = askopenfile(initialdir=FILEDIR, title="Select file", filetypes=(("txt files", "*.txt"),("all files", "*.*")))
         if path is not None:
             data = upload(path.name)
-            print(data)
             for dots in data["Figure"]:
                 self.dots.append(tuple(dots))
                 fig = self.plot.show_dot(dots)
