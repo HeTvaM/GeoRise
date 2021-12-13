@@ -28,18 +28,18 @@ def scale(func):
         def check_border():
             border = func(cls, size)
             if border[0][1] < 5:
-                return cls.reinit()
+                return cls.redraw()
             else:
                 cls.border = border
 
-            if cls.step < 1:
-                cls.step = 1
+            if cls.step < 0.5:
+                cls.step = 0.5
 
         cls = args[0]
-        size = cls.border[0][1] - 1
+        size = 4*cls.border_dots[1]
 
         check_border()
-
+        cls.border_dots[0], cls.border_dots[1]  = size/2, size/2
         res = cls.redraw()
 
         return res

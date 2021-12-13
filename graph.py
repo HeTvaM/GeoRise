@@ -31,6 +31,7 @@ class Plot:
         self.lastline = {"X":[],
                          "Y":[]}
         self.border = [(-5, 6), (6, -5)]
+        self.border_dots = [5, 5]
         self.step = 1.0
 
     def init_graph(self):
@@ -64,6 +65,7 @@ class Plot:
         tick_x(x.max()*1.0, x.min()*1.0)
         tick_y(y.max()*1.0, x.min()*1.0)
 
+
     def init_display(self):
         "Создание объёекта сетки"
         self.show_graph(self.border)
@@ -74,19 +76,25 @@ class Plot:
         def analyse_dot(dot):
             "Анализ границ декартовой сетки. Если какая-то точка находиться за пределами, то пределы меняются"
             for num, Oi in enumerate(dot):
-                if abs(Oi) > (abs(self.border[0][num]) or abs(self.border[1][num])):
+                Oi = abs(Oi)
+                if Oi > self.border_dots[1]:
+                    self.border_dots[0], self.border_dots[1] = self.border_dots[1], Oi
                     self.border = [(-Oi, Oi+1), (Oi+1, -Oi)]
-                    self.step = Oi/10
+                    self.step = round(Oi/10 % 0.5, 1) if Oi > 10 else 1.0
+                    print(self.step)
                     self.redraw()
                     return
+                elif Oi > self.border_dots[0]:
+                    self.border_dots[0] = Oi
         def new_line():
             self.data["X"].append([dot[0] for dot in self.dots[size-2:]])
             self.data["Y"].append([dot[1] for dot in self.dots[size-2:]])
             self.ax.plot(self.data["X"][ls], self.data["Y"][ls], color="b", label=f"Side №:{ls+1}")
 
         self.dots.append(dot)
-        analyse_dot(dot)
         self.ax.scatter(dot[0],dot[1])
+        analyse_dot(dot)
+
         size = len(self.dots)
         ls = len(self.data["X"])
 
@@ -109,6 +117,14 @@ class Plot:
 
     def laststep(self):
         "Откатывает сетку, к предыдущему вводу точки"
+        def check_scale():
+            for dot in self.dots:
+                for Oi in dot:
+                    if abs(Oi) >= self.border_dots[1]:
+                        return True
+
+            self.border_dots[1] = self.border_dots[0]
+            return self.border_dots[0]
         def reinit():
             try:
                 self.dots.pop()
@@ -117,21 +133,25 @@ class Plot:
             except IndexError:
                 return self.figure
 
-            self.redraw()
-
         reinit()
+        res = check_scale()
+        if res is not True:
+            self.border = [(-res, res+1), (res+1, -res)]
+        self.redraw()
         return self.figure
 
     @scale
     def scale_in(self, size):
         "Увеличение масштаба декартовой сетки"
-        self.step = (size*2)/10
+        self.step = (size/ 10) if size > 10 else 0.5
+        print(self.step)
         return [(-size*2, size*2+1), (size*2+1, -size*2)]
 
     @scale
     def scale_out(self, size):
         "Уменьшение масштаба декартовой сетки"
-        self.step = (size/2)/10
+        self.step = (size/40 // 1.0) if size > 40 else 0.5
+        print(self.step)
         return [(-size/2, size/2+1), (size/2+1, -size/2)]
 
     def redraw(self):
@@ -147,9 +167,10 @@ class Plot:
         for i in range(len(self.data["X"])):
             self.ax.plot(self.data["X"][i], self.data["Y"][i], color="b", label=f"Side №:{i+1}")
 
-        self.lastline["X"] = [dot[0] for dot in [self.dots[0], self.dots[-1]]]
-        self.lastline["Y"] = [dot[1] for dot in [self.dots[0], self.dots[-1]]]
-        self.ax.plot(self.lastline["X"],self.lastline["Y"], color="b",label=f"Side №:{ls+1}")
+        if ls > 0:
+            self.lastline["X"] = [dot[0] for dot in [self.dots[0], self.dots[-1]]]
+            self.lastline["Y"] = [dot[1] for dot in [self.dots[0], self.dots[-1]]]
+            self.ax.plot(self.lastline["X"],self.lastline["Y"], color="b",label=f"Side №:{ls+1}")
 
         return self.figure
 
@@ -162,3 +183,7 @@ class Plot:
                      "Y": []}
         self.lastline = {"X":[],
                          "Y":[]}
+        self.border_dots = [5, 5]
+        self.borders = [(-5, 6), (6, -5)]
+        self.step = 1.0
+        self.redraw()
